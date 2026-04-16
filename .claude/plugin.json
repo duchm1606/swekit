@@ -1,0 +1,15 @@
+{
+  "name": "duck-skills",
+  "version": "1.0.0",
+  "description": "Duck workflow skills: brainstorming → research → planning → executing → reviewing → debugging",
+  "author": "duchm1606",
+  "repository": "https://github.com/duchm1606/swekit",
+  "skills": "./skills",
+  "keywords": [
+    "workflow",
+    "planning",
+    "debugging",
+    "code-review",
+    "brainstorming"
+  ]
+}

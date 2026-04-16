@@ -1,0 +1,18 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code local settings (keep settings.json, ignore local)
+.claude/settings.local.json
+
+# Reference materials (not part of the plugin)
+.ref/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
