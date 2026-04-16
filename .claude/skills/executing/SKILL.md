@@ -40,6 +40,30 @@ From planning skill:
 
 ---
 
+## HARD GATE: Subagent-Only Implementation
+
+**The master agent MUST NOT implement code directly.**
+
+| Role | Responsibilities |
+|------|------------------|
+| Master Agent | Load tasks, dispatch subagents, review output, coordinate, commit |
+| Subagent | Implement task, write tests, report status |
+
+### Master Agent Does NOT:
+- Write implementation code
+- Modify source files directly
+- "Quickly fix" something instead of dispatching
+
+### Subagent Status Protocol:
+- **DONE** — Task complete, proceed to review
+- **DONE_WITH_CONCERNS** — Complete but flagged doubts, read before proceeding
+- **NEEDS_CONTEXT** — Missing information, provide and re-dispatch
+- **BLOCKED** — Cannot proceed, assess and escalate
+
+**If you find yourself writing implementation code, STOP. Dispatch a subagent instead.**
+
+---
+
 ## Process
 
 ```
@@ -233,12 +257,30 @@ Checkpoint if needed
 Next task
 ```
 
-### Update Beads After Review
+### Update Beads + Commit After Review
+
+**Every task completion = beads update + git commit.**
 
 ```bash
+# 1. Update beads status
 br update --id <task-id> --status done
-br list  # verify state
+
+# 2. Commit the task completion (REQUIRED)
+git add -A
+git commit -m "feat(<scope>): task <task-id> - <brief summary>"
+
+# 3. Verify
+br list
+git log --oneline -1
 ```
+
+**Why commit per task:**
+- Easy revert of individual tasks (`git revert <commit>`)
+- Clear history of what each task changed
+- Checkpoint for recovery if later tasks fail
+- Bisect-friendly for debugging
+
+**Do not proceed to next task without committing current task.**
 
 ---
 
@@ -398,6 +440,10 @@ Artifacts:
 | Let subagent scope creep | Strict task boundaries |
 | Wait forever for silent agent | Check after 5 min, escalate after 3 retries |
 | Skip checkpoints | Save every 3 tasks minimum |
+| **Master implements directly** | **Dispatch subagent for all implementation** |
+| **Skip commit after task** | **Always commit after task completion** |
+| **Batch commits for multiple tasks** | **One commit per task for easy revert** |
+| **"Quick fix" without subagent** | **Even small fixes go through subagent** |
 
 ---
 
@@ -411,6 +457,11 @@ Artifacts:
 - BLOCKED status ignored
 - No checkpoint for 5+ tasks
 - Same error repeated 3+ times
+- **Master agent writing implementation code**
+- **Multiple tasks completed without commits**
+- **Beads updated but no corresponding commit**
+- **Commit includes changes from multiple tasks**
+- **"I'll just quickly..." instead of dispatching subagent**
 
 ---
 

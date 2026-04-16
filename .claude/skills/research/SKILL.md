@@ -152,7 +152,12 @@ After approach approved, lock constraints:
 - {excluded}
 ```
 
-Save: `history/<topic>/CONTEXT.md`
+**MUST WRITE:** `history/<topic>/CONTEXT.md`
+
+```bash
+mkdir -p history/<topic>
+# Write CONTEXT.md now - do not proceed to research without file written
+```
 
 ---
 
@@ -195,6 +200,12 @@ Save: `history/<topic>/CONTEXT.md`
 **Rules:**
 - Complexity = impact + risk (never time)
 - Recommendation = conditional
+
+**MUST WRITE:** `history/<topic>/COMPARISON.md`
+
+```bash
+# Write COMPARISON.md now - do not proceed to gate without file written
+```
 
 ---
 
@@ -239,7 +250,21 @@ Spawn 4 parallel agents:
 | Comparison | COMPARISON.md |
 | Pitfalls | PITFALLS.md |
 
-Synthesize → SUMMARY.md
+**MUST WRITE (each agent):**
+- `history/<topic>/STACK.md`
+- `history/<topic>/FEATURES.md`
+- `history/<topic>/COMPARISON.md`
+- `history/<topic>/PITFALLS.md`
+
+Synthesize all outputs into:
+
+**MUST WRITE:** `history/<topic>/SUMMARY.md`
+
+```bash
+# Each agent writes its file
+# Master synthesizes into SUMMARY.md
+# Do not proceed to gate without all files written
+```
 
 ---
 
@@ -261,6 +286,9 @@ Synthesize → SUMMARY.md
 | Jump to research | Propose approaches, get approval |
 | "It depends" | Pick winner + runner-up |
 | Trust training | Verify sources |
+| **Output comparison in conversation** | **Write to history/<topic>/COMPARISON.md** |
+| **Describe CONTEXT.md format** | **Actually write the file** |
+| **Proceed without files written** | **MUST WRITE before next phase** |
 
 ---
 
@@ -270,6 +298,10 @@ Synthesize → SUMMARY.md
 - No approach proposal before research
 - `[ASSUMED]` becoming locked decision
 - Unresolved gate questions
+- **CONTEXT.md not written before Phase 4**
+- **COMPARISON.md not written before gate**
+- **Deep mode agents not writing their files**
+- **Research exists only in conversation**
 
 ---
 

@@ -153,9 +153,49 @@ Proceed with {X}?
 
 ---
 
-## Phase 4: Frame Research
+## HARD GATE: Write DIRECTION.md
 
-After approval, create research handoff:
+**After user approves the selected option, you MUST write the direction file.**
+
+Use template: `references/direction-template.md`
+Save to: `history/<topic>/DIRECTION.md`
+
+```bash
+# Create directory if needed
+mkdir -p history/<topic>
+
+# Write DIRECTION.md using template
+```
+
+**Do not continue until file is written and confirmed.**
+
+---
+
+## Decision Point
+
+After writing DIRECTION.md, present to user:
+
+```markdown
+Direction written to: history/<topic>/DIRECTION.md
+
+**Next step options:**
+
+1. **Research** - Need to evaluate packages, libraries, or technical approaches
+   - Use when: comparing options, need external info, unclear implementation path
+   
+2. **Planning** - Requirements are clear, ready to break into implementation tasks
+   - Use when: approach is decided, just need to execute
+
+Which path: research or planning?
+```
+
+**Wait for user response. Do not assume or proceed automatically.**
+
+---
+
+## Path A: Research (if more information needed)
+
+If user chose research, create research handoff:
 
 ```markdown
 # Research Direction: {topic}
@@ -178,14 +218,10 @@ After approval, create research handoff:
 - {how we'll know research is complete}
 ```
 
-Save: `history/<topic>/DIRECTION.md`
-
----
-
-## Handoff to Research
+This should already be in `history/<topic>/DIRECTION.md`.
 
 ```markdown
-Brainstorming complete.
+Brainstorming complete. Research path selected.
 
 **Direction:** {selected option}
 **Research questions:** {count}
@@ -193,6 +229,23 @@ Brainstorming complete.
 Artifact: history/<topic>/DIRECTION.md
 
 Ready to start research? Use duck:research.
+```
+
+---
+
+## Path B: Planning (if requirements clear)
+
+If user chose planning and no research needed:
+
+```markdown
+Brainstorming complete. Planning path selected.
+
+**Direction:** {selected option}
+**Requirements identified:** {count}
+
+Artifact: history/<topic>/DIRECTION.md
+
+Ready for implementation planning. Use duck:planning.
 ```
 
 ---
@@ -205,7 +258,10 @@ Ready to start research? Use duck:research.
 | Filter while generating | Generate then evaluate |
 | One option only | Minimum 3 options |
 | Vague directions | Specific research questions |
-| Skip user approval | Gate before research |
+| Skip user approval | Gate before proceeding |
+| Skip writing DIRECTION.md | Always write file before next step |
+| Assume research vs planning | Ask user which path |
+| Proceed without file written | Confirm file exists first |
 
 ---
 
@@ -213,9 +269,12 @@ Ready to start research? Use duck:research.
 
 - Jumping straight to "best library for X"
 - Only one option generated
-- No user approval before research
+- No user approval before proceeding
 - Research questions too broad
 - Skipping problem exploration
+- **No DIRECTION.md file written**
+- **Assuming path without asking user**
+- **Going directly to implementation**
 
 ---
 
@@ -223,7 +282,9 @@ Ready to start research? Use duck:research.
 
 ```
 history/<topic>/
-└── DIRECTION.md (from brainstorming)
+└── DIRECTION.md (MUST be written before proceeding)
     ↓
-duck:research picks up here
+    User chooses path:
+    ├── duck:research (if more info needed)
+    └── duck:planning (if requirements clear)
 ```

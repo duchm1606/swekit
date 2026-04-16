@@ -95,7 +95,12 @@ Lock each: `"R{N}: {requirement}. Confirmed?"`
 - Related files: {found}
 ```
 
-Save: `history/<topic>/CONTEXT.md`
+**MUST WRITE:** `history/<topic>/CONTEXT.md`
+
+```bash
+mkdir -p history/<topic>
+# Write CONTEXT.md now - do not proceed without file written
+```
 
 ---
 
@@ -139,7 +144,11 @@ Phase 2 requires Phase 1 because {reason}.
 - If phase has 5+ stories, split it
 - Plain language test: can a PM understand it?
 
-Save: `history/<topic>/phase-plan.md`
+**MUST WRITE:** `history/<topic>/phase-plan.md`
+
+```bash
+# Write phase-plan.md now - do not proceed without file written
+```
 
 ---
 
@@ -195,7 +204,11 @@ Only after approval, detail current phase.
 - Each story unlocks next story or closes exit state
 - "Done when" must be verifiable
 
-Save: `history/<topic>/phase-1-spec.md`
+**MUST WRITE:** `history/<topic>/phase-1-spec.md`
+
+```bash
+# Write phase-1-spec.md now - do not proceed without file written
+```
 
 ---
 
@@ -259,7 +272,13 @@ git commit -m "feat: add specific feature"
 | Commands | Exact with expected output |
 | No placeholders | TBD, TODO, "similar to" = failure |
 
-Save: `history/<topic>/phase-1-tasks.md`
+**MUST WRITE:** `history/<topic>/phase-1-tasks.md`
+
+```bash
+# Write phase-1-tasks.md now - do not proceed without file written
+```
+
+**Planning is not complete until all files are written.**
 
 ---
 
@@ -272,6 +291,9 @@ Save: `history/<topic>/phase-1-tasks.md`
 | "Add tests" | Show exact test code |
 | "Similar to Task 1" | Repeat the code |
 | "Handle edge cases" | List specific cases with code |
+| Output plan in conversation | Write to history/<topic>/ files |
+| Describe what file should contain | Actually write the file |
+| Say "Save:" | Use "MUST WRITE:" and write it |
 
 ---
 
@@ -284,6 +306,9 @@ Save: `history/<topic>/phase-1-tasks.md`
 - "Foundation" phase with no demo
 - Skipping user approval gate
 - Placeholders in any form
+- **Plan exists only in conversation, not in files**
+- **Missing phase-plan.md, phase-X-spec.md, or phase-X-tasks.md**
+- **Proceeding to execution without written artifacts**
 
 ---
 

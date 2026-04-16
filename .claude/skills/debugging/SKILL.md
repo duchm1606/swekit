@@ -47,6 +47,32 @@ Classify before investigating. Misclassifying wastes time.
 
 Example: `Build failure in auth/handler.go: undefined: ValidateToken`
 
+**MUST WRITE:** `history/<topic>/debug-notes.md`
+
+```markdown
+# Debug Notes: <topic>
+
+**Date:** YYYY-MM-DD
+**Triage:** [TYPE] in [component]: [symptom]
+
+## Error Output
+```
+<paste exact error here>
+```
+
+## Investigation Log
+- [ ] Phase 2: Check known patterns
+- [ ] Phase 3: Reproduce
+- [ ] Phase 4: Root cause
+- [ ] Phase 5: Fix
+- [ ] Phase 6: Learn
+```
+
+```bash
+mkdir -p history/<topic>
+# Write debug-notes.md now - update as you progress through phases
+```
+
 ---
 
 ## Phase 2: Check Known Patterns
@@ -148,6 +174,25 @@ Run once to find WHERE it breaks, then investigate that layer.
 
 **If you cannot write this sentence, you don't have root cause. Do not proceed.**
 
+**MUST UPDATE:** `history/<topic>/debug-notes.md`
+
+Add to debug-notes.md:
+```markdown
+## Root Cause
+**Statement:** `<file>:<line>` — `<what is wrong and why>`
+**Evidence:** <what confirmed this>
+**Trace:** <call stack or data flow that led here>
+```
+
+---
+
+## HARD GATE: Before Fix
+
+**Do not proceed to fix without:**
+1. debug-notes.md exists with triage and root cause
+2. Root cause statement is specific (file:line, not vague)
+3. Evidence documented (not just "I think")
+
 ---
 
 ## Phase 5: Hypothesis and Fix
@@ -208,7 +253,13 @@ go test ./... -v
 **Signal:** <how to recognize in future>
 ```
 
-Save to: `history/learnings/patterns.md`
+**MUST WRITE:** `history/learnings/patterns.md`
+
+```bash
+mkdir -p history/learnings
+# Append new pattern to patterns.md
+# This enables Phase 2 (Check Known) in future debugging sessions
+```
 
 ### Update If Known Pattern Failed
 
@@ -231,6 +282,8 @@ If you catch yourself thinking:
 | "I'll test after" | Untested fixes don't stick |
 | "One more fix attempt" (after 2+) | 3+ = architecture problem |
 | "It's probably X" | Probably ≠ root cause |
+| **"I'll write notes later"** | **Write debug-notes.md at triage** |
+| **"Don't need to save pattern"** | **Future you will thank present you** |
 
 **All mean: STOP. Return to Phase 3 or 4.**
 
@@ -245,6 +298,8 @@ If you catch yourself thinking:
 | "I see the problem" | Seeing symptom ≠ understanding cause |
 | "Just this once" | First fix sets the pattern |
 | "Multiple fixes saves time" | Can't isolate what worked |
+| **"Notes are overhead"** | **Notes enable future debugging** |
+| **"Pattern is obvious"** | **Obvious to you now, not in 3 months** |
 
 ---
 
