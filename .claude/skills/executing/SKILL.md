@@ -4,7 +4,7 @@ description: >-
   Use after duck:planning skill completes, when phase-1-tasks.md exists.
   Triggers: "execute tasks", "implement plan", "start building", ready to code.
 metadata:
-  version: '1.0'
+  version: '1.1'
   dependencies:
     - id: duck:planning
       kind: skill
@@ -25,7 +25,8 @@ metadata:
 
 - **Subagents do the work.** Master agent coordinates and reviews.
 - **One task per subagent.** Parallel when independent, sequential when dependent.
-- **Review before merge.** No subagent work enters main without master review.
+- **Two-stage review.** Spec compliance first, then code quality.
+- **Checkpoint often.** Save state every 3 tasks or before complex operations.
 
 ---
 
@@ -42,7 +43,9 @@ From planning skill:
 ## Process
 
 ```
-Load Tasks → Spawn Subagents → Review Each → Integrate → Verify Exit State
+Load → Spawn → Handle Status → Spec Review → Quality Review → Checkpoint → Next Task
+                    ↓
+              BLOCKED/NEEDS_CONTEXT → Resolve → Re-dispatch
 ```
 
 ---
@@ -53,6 +56,7 @@ Load Tasks → Spawn Subagents → Review Each → Integrate → Verify Exit Sta
 
 ```bash
 Read history/<topic>/phase-1-tasks.md
+Read history/<topic>/phase-1-spec.md
 ```
 
 ### Initialize Beads (if available)
@@ -63,6 +67,24 @@ br add --title "Task 1.1: <action>" --status todo
 br add --title "Task 1.2: <action>" --status todo
 # ... for each task
 br list
+```
+
+### Initialize Checkpoint
+
+```bash
+Write history/<topic>/checkpoint.json
+```
+
+```json
+{
+  "phase": 1,
+  "started_at": "ISO-timestamp",
+  "completed_tasks": [],
+  "in_progress": [],
+  "blocked": [],
+  "last_commit": null,
+  "task_count": 0
+}
 ```
 
 ### Build Dependency Graph
@@ -77,14 +99,13 @@ br list
 
 ## Phase 1: Spawn Subagents
 
-### Dispatch Rules
+### Model Selection
 
-| Condition | Action |
-|-----------|--------|
-| Independent tasks | Spawn in parallel |
-| Dependent task | Wait for dependencies |
-| Large codebase | Use Agent Mail for coordination |
-| Simple task | Single subagent |
+| Task Complexity | Model | Signals |
+|-----------------|-------|---------|
+| Simple | haiku | 1-2 files, clear spec, isolated |
+| Standard | sonnet | Multi-file, some integration |
+| Complex | opus | Architecture, design judgment, debugging |
 
 ### Subagent Prompt Template
 
@@ -101,58 +122,169 @@ br list
 1. Follow TDD steps exactly as written
 2. Do not modify files outside task scope
 3. Commit after each passing test
-4. Report: files changed, tests passed, blockers
+
+## Response Format (REQUIRED)
+End your response with:
+
+**Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+**Files Changed:** {list}
+**Tests:** {passed/failed count}
+**Commit:** {hash or "none"}
+**Concerns/Blockers:** {if applicable}
 
 ## Constraints
 - No new dependencies without approval
 - No refactoring outside task scope
-- Stop and report if blocked
+- Report BLOCKED immediately if stuck
 ```
 
 ### Spawning
 
 ```
-Agent(description="Task 1.1: <action>", prompt=<template>)
-Agent(description="Task 1.2: <action>", prompt=<template>)
+Agent(description="Task 1.1: <action>", prompt=<template>, model="sonnet")
+Agent(description="Task 1.2: <action>", prompt=<template>, model="sonnet")
 ```
 
 **Parallel spawning:** Send independent tasks in single message.
 
 ---
 
-## Phase 2: Review Each Subagent
+## Phase 2: Handle Worker Status
 
-**Every subagent result requires master review before proceeding.**
+### Status Protocol
 
-### Review Checklist
+| Status | Meaning | Master Action |
+|--------|---------|---------------|
+| **DONE** | Task complete | Proceed to spec review |
+| **DONE_WITH_CONCERNS** | Complete but flagged doubts | Read concerns → address if correctness issue → proceed if observational |
+| **BLOCKED** | Cannot proceed | Assess → provide context / break task / escalate |
+| **NEEDS_CONTEXT** | Missing information | Provide missing info → re-dispatch |
 
-| Check | Pass Criteria |
-|-------|---------------|
-| Files match task | Only listed files modified |
-| Tests exist | Test file created/updated |
-| Tests pass | `go test` / `npm test` green |
-| No scope creep | No extra features/refactoring |
-| Commits atomic | One logical change per commit |
+### Handling BLOCKED
 
-### Review Actions
+```
+BLOCKED received
+    ↓
+Is it a context problem? → Provide context, re-dispatch same model
+    ↓ no
+Is task too complex? → Re-dispatch with more capable model
+    ↓ no
+Is task too large? → Break into smaller tasks
+    ↓ no
+Escalate to user
+```
 
-| Result | Action |
-|--------|--------|
-| PASS | Mark task complete, proceed |
-| MINOR issues | Fix inline, then mark complete |
-| MAJOR issues | Re-dispatch subagent with feedback |
-| BLOCKED | Escalate to user |
+**Never** retry same task with same context after BLOCKED. Something must change.
 
-### Update Beads
+### Silence Handling
+
+| Condition | Action |
+|-----------|--------|
+| Subagent returns without status | Ask for status explicitly |
+| Background agent silent 5+ min | Check if still running, send reminder |
+| 3 retries with no progress | Mark blocked, escalate |
+
+---
+
+## Phase 3: Two-Stage Review
+
+**Every completed task gets TWO reviews before proceeding.**
+
+### Stage 1: Spec Compliance Review
+
+Does the implementation match the spec?
+
+| Check | Question |
+|-------|----------|
+| Requirements met | Does code do what spec says? |
+| Constraints honored | Are limitations respected? |
+| Nothing extra | No unrequested features? |
+| Nothing missing | All spec items addressed? |
+
+**If FAIL:** Subagent fixes spec gaps → re-review spec compliance.
+
+### Stage 2: Code Quality Review
+
+Is the implementation well-built?
+
+| Check | Question |
+|-------|----------|
+| Tests exist | Test file created/updated? |
+| Tests pass | All green? |
+| No scope creep | Only listed files modified? |
+| Code quality | Readable, maintainable? |
+| Security | No obvious vulnerabilities? |
+
+**If FAIL:** Subagent fixes quality issues → re-review quality.
+
+### Review Flow
+
+```
+DONE received
+    ↓
+Spec Compliance Review
+    ↓ PASS
+Code Quality Review
+    ↓ PASS
+Mark task complete (br update --status done)
+    ↓
+Checkpoint if needed
+    ↓
+Next task
+```
+
+### Update Beads After Review
 
 ```bash
 br update --id <task-id> --status done
-br list
+br list  # verify state
 ```
 
 ---
 
-## Phase 3: Agent Mail (Large Codebases)
+## Phase 4: Context Management
+
+### Checkpoint Triggers
+
+Save checkpoint when:
+- Every 3 tasks completed
+- Before spawning 5+ parallel subagents
+- After processing large file (500+ lines)
+- When switching phases
+- Before any risky operation
+
+### Checkpoint Format
+
+Update `history/<topic>/checkpoint.json`:
+
+```json
+{
+  "phase": 1,
+  "started_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-01-15T11:30:00Z",
+  "completed_tasks": ["1.1", "1.2", "1.3"],
+  "in_progress": ["1.4"],
+  "blocked": [],
+  "last_commit": "abc1234",
+  "task_count": 4,
+  "files_modified": ["src/auth.go", "src/auth_test.go"],
+  "resume_from": "Task 1.4",
+  "notes": "Task 1.4 in progress, waiting for subagent"
+}
+```
+
+### Resume Protocol
+
+If session interrupted:
+
+1. Read `checkpoint.json`
+2. Verify `last_commit` matches current HEAD
+3. Check status of `in_progress` tasks
+4. Resume from `resume_from` task
+
+---
+
+## Phase 5: Agent Mail (Large Codebases)
 
 Use when:
 - 5+ subagents active
@@ -182,7 +314,7 @@ mcp__agent-mail broadcast --message "Task 1.1 complete, file.go updated"
 
 ---
 
-## Phase 4: Integration
+## Phase 6: Integration
 
 After all tasks complete:
 
@@ -201,10 +333,10 @@ Compare against `phase-1-spec.md`:
 ```markdown
 ## Exit State Verification
 
-| Criterion | Status |
-|-----------|--------|
-| {criterion 1} | PASS/FAIL |
-| {criterion 2} | PASS/FAIL |
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| {criterion 1} | PASS/FAIL | {file:line or test} |
+| {criterion 2} | PASS/FAIL | {evidence} |
 ```
 
 ### Integration Commit
@@ -214,9 +346,23 @@ git add -A
 git commit -m "feat(<scope>): complete phase 1 - <summary>"
 ```
 
+### Final Checkpoint
+
+```json
+{
+  "phase": 1,
+  "status": "complete",
+  "completed_tasks": ["1.1", "1.2", "1.3", "1.4"],
+  "in_progress": [],
+  "blocked": [],
+  "last_commit": "final-hash",
+  "exit_state": "verified"
+}
+```
+
 ---
 
-## Phase 5: Handoff
+## Phase 7: Handoff
 
 ```markdown
 Phase 1 execution complete.
@@ -225,6 +371,7 @@ Phase 1 execution complete.
 - Tasks completed: {N}/{total}
 - Tests passing: {count}
 - Files changed: {list}
+- Reviews: All passed (spec + quality)
 
 ## Exit State
 All criteria from phase-1-spec.md verified.
@@ -232,10 +379,11 @@ All criteria from phase-1-spec.md verified.
 ## Next Steps
 - [ ] User review
 - [ ] Proceed to Phase 2 (if exists)
+- [ ] Run duck:reviewing for final check
 
 Artifacts:
-- Task log: history/<topic>/phase-1-execution.md
-- Beads state: `br list`
+- Checkpoint: history/<topic>/checkpoint.json
+- Execution log: history/<topic>/phase-1-execution.md
 ```
 
 ---
@@ -245,10 +393,11 @@ Artifacts:
 | Don't | Do |
 |-------|-----|
 | Execute without task file | Load from planning artifacts |
-| Skip subagent review | Review every result |
+| Skip either review stage | Both spec and quality reviews required |
+| Retry BLOCKED without changes | Change context, model, or task scope |
 | Let subagent scope creep | Strict task boundaries |
-| Batch all commits | Atomic commits per task |
-| Assume tests pass | Verify after each task |
+| Wait forever for silent agent | Check after 5 min, escalate after 3 retries |
+| Skip checkpoints | Save every 3 tasks minimum |
 
 ---
 
@@ -259,6 +408,38 @@ Artifacts:
 - Tests not written before implementation
 - Skipping review "to save time"
 - File conflicts between subagents
+- BLOCKED status ignored
+- No checkpoint for 5+ tasks
+- Same error repeated 3+ times
+
+---
+
+## Quick Reference
+
+### Worker Status
+
+| Status | Action |
+|--------|--------|
+| DONE | → Spec review |
+| DONE_WITH_CONCERNS | Read concerns → decide → review |
+| BLOCKED | Change something → re-dispatch |
+| NEEDS_CONTEXT | Provide info → re-dispatch |
+
+### Review Order
+
+```
+1. Spec Compliance (matches requirements?)
+2. Code Quality (well-built?)
+```
+
+### Checkpoint Triggers
+
+```
+- Every 3 tasks
+- Before 5+ parallel spawns
+- After large file processing
+- Phase transitions
+```
 
 ---
 
@@ -274,6 +455,14 @@ Artifacts:
 
 Status values: `todo`, `in-progress`, `blocked`, `done`
 
+### Beads + Checkpoint Sync
+
+After each task completion:
+```bash
+br update --id <task-id> --status done
+# Then update checkpoint.json
+```
+
 ---
 
 ## Output Summary
@@ -284,5 +473,6 @@ history/<topic>/
 ├── phase-plan.md        (from planning)
 ├── phase-1-spec.md      (from planning)
 ├── phase-1-tasks.md     (from planning)
-└── phase-1-execution.md (from executing)
+├── phase-1-execution.md (from executing)
+└── checkpoint.json      (state management)
 ```
