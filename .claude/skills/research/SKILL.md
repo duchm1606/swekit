@@ -8,7 +8,7 @@ metadata:
   dependencies:
     - id: beads-cli
       kind: command
-      command: br
+      command: bd
       missing_effect: degraded
     - id: context7
       kind: mcp_server

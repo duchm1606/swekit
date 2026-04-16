@@ -11,7 +11,7 @@ metadata:
       missing_effect: blocked
     - id: beads-cli
       kind: command
-      command: br
+      command: bd
       missing_effect: degraded
     - id: agent-mail
       kind: mcp_server
@@ -86,11 +86,11 @@ Read history/<topic>/phase-1-spec.md
 ### Initialize Beads (if available)
 
 ```bash
-br init --name "<feature-name>"
-br add --title "Task 1.1: <action>" --status todo
-br add --title "Task 1.2: <action>" --status todo
+bd init --name "<feature-name>"
+bd add --title "Task 1.1: <action>" --status todo
+bd add --title "Task 1.2: <action>" --status todo
 # ... for each task
-br list
+bd list
 ```
 
 ### Initialize Checkpoint
@@ -250,7 +250,7 @@ Spec Compliance Review
     ↓ PASS
 Code Quality Review
     ↓ PASS
-Mark task complete (br update --status done)
+Mark task complete (bd update --status done)
     ↓
 Checkpoint if needed
     ↓
@@ -263,14 +263,14 @@ Next task
 
 ```bash
 # 1. Update beads status
-br update --id <task-id> --status done
+bd update --id <task-id> --status done
 
 # 2. Commit the task completion (REQUIRED)
 git add -A
 git commit -m "feat(<scope>): task <task-id> - <brief summary>"
 
 # 3. Verify
-br list
+bd list
 git log --oneline -1
 ```
 
@@ -498,11 +498,11 @@ Artifacts:
 
 | Command | Purpose |
 |---------|---------|
-| `br init --name "<name>"` | Start new bead |
-| `br add --title "<task>"` | Add task |
-| `br update --id <id> --status <status>` | Update status |
-| `br list` | Show all tasks |
-| `br current` | Show active task |
+| `bd init --name "<name>"` | Start new bead |
+| `bd add --title "<task>"` | Add task |
+| `bd update --id <id> --status <status>` | Update status |
+| `bd list` | Show all tasks |
+| `bd current` | Show active task |
 
 Status values: `todo`, `in-progress`, `blocked`, `done`
 
@@ -510,7 +510,7 @@ Status values: `todo`, `in-progress`, `blocked`, `done`
 
 After each task completion:
 ```bash
-br update --id <task-id> --status done
+bd update --id <task-id> --status done
 # Then update checkpoint.json
 ```
 
