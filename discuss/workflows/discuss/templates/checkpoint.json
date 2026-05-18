@@ -1,0 +1,94 @@
+{
+  "schema_version": 3,
+  "slug": "<kebab-slug>",
+  "title": "<human readable title>",
+  "started_at": "<ISO-8601 timestamp when discuss began>",
+  "updated_at": "<ISO-8601 timestamp of this checkpoint write>",
+  "mode": "default|auto",
+  "project_root": "<absolute path resolved by initialize step>",
+  "discuss_dir": "<absolute path: PROJECT_ROOT/.discuss or override>",
+  "story_dir": "<absolute path: discuss_dir/<slug>>",
+  "work_item": "<confirmed restatement>",
+  "scope": "Quick|Standard|Deep",
+  "domain_primary": "SEE|CALL|RUN|READ|ORGANIZE",
+  "domain_secondary": "SEE|CALL|RUN|READ|ORGANIZE|none",
+  "scope_user_choice": "Quick|Standard|Deep",
+  "domain_user_choice_primary": "SEE|CALL|RUN|READ|ORGANIZE",
+  "domain_user_choice_secondary": "SEE|CALL|RUN|READ|ORGANIZE|none",
+  "gray_areas_total": 0,
+  "gray_areas_completed": [
+    {
+      "name": "<area name>",
+      "completed_at": "<ISO timestamp>",
+      "decisions": [
+        {
+          "id": "D-01",
+          "headline": "<short decision sentence>",
+          "rationale": "<one-line reason>",
+          "options_presented": [
+            { "label": "<option A>", "reason": "<one-line>" },
+            { "label": "<option B>", "reason": "<one-line>" }
+          ],
+          "chosen": "<option label or free-text answer>",
+          "notes": "<any follow-up clarification>"
+        }
+      ],
+      "agent_discretion": [
+        {
+          "area": "<area name>",
+          "constraint": "<the fence the agent must stay inside>"
+        }
+      ],
+      "blocker_questions": [
+        {
+          "id": "Q-NN",
+          "area": "<area name>",
+          "why_it_blocks": "<reason next phase cannot proceed>",
+          "owner": "user|team|external"
+        }
+      ],
+      "delegated_questions": [
+        {
+          "id": "Q-NN",
+          "area": "<area name>",
+          "constraint": "<one-line or 'none'>",
+          "routed_because": "user_delegated|auto_could_not_resolve"
+        }
+      ],
+      "scope_creep_redirects": [
+        { "raised": "<idea>", "outcome": "deferred|open_question|dropped" }
+      ]
+    }
+  ],
+  "gray_areas_pending": [
+    {
+      "name": "<area name>",
+      "candidate_options": ["<a>", "<b>"],
+      "annotation": "<code-context or prior-decision note>"
+    }
+  ],
+  "canonical_refs_accumulator": [
+    { "path": "docs/adr/0001-...md", "added_in": "discover|scout|analyze|discuss", "note": "<one-line>" },
+    { "path": "context7:<library>", "added_in": "analyze|discuss", "note": "<area / D-NN informed>" },
+    { "path": "deepwiki:<org>/<repo>", "added_in": "analyze|discuss", "note": "<area / D-NN informed>" }
+  ],
+  "research_accelerators": {
+    "enabled": true,
+    "context7_queries": [
+      { "library": "<resolved id>", "question": "<one-line>", "informed": "<area / D-NN>" }
+    ],
+    "deepwiki_queries": [
+      { "repo": "<org>/<repo>", "question": "<scoped question>", "informed": "<area / D-NN>" }
+    ],
+    "skipped_reason": null
+  },
+  "deferred_ideas": [
+    "<idea>"
+  ],
+  "prior_decisions_applied": [
+    { "from": "<file path>", "applied_to_area": "<area>", "as": "pre-answered" }
+  ],
+  "review_loops_run": 0,
+  "review_p1_outstanding": [],
+  "next_step_on_resume": "discuss_areas|write_context|review_context|write_log"
+}
